@@ -19,50 +19,78 @@ package cmd
 import (
 	"fmt"
 
-	"encoding/json"
+	goVersion "go.hein.dev/go-version"
 
 	"github.com/spf13/cobra"
 )
 
 const appName = "kusible"
 
-// Version is the application version. It will be overriden during the build process.
-// See https://www.digitalocean.com/community/tutorials/using-ldflags-to-set-version-information-for-go-applications
-var Version = "development"
+// // Version is the application version. It will be overriden during the build process.
+// // See https://www.digitalocean.com/community/tutorials/using-ldflags-to-set-version-information-for-go-applications
+// var Version = "development"
 
-// BuildTime is the date/time when the binary was build. It should be set by the build process and will not be
-// displayed if it is empty.
-var BuildTime string
+// // BuildTime is the date/time when the binary was build. It should be set by the build process and will not be
+// // displayed if it is empty.
+// var BuildTime string
 
-// GitRev is the Git revision of the code the binary is build from. It should be set by the build process and will not be
-// displayed if it is empty.
-var GitRev string
+// // GitRev is the Git revision of the code the binary is build from. It should be set by the build process and will not be
+// // displayed if it is empty.
+// var GitRev string
 
-// GitTreeState indicates if the git tree had uncommited changes when the binary was build. It should be set by the build
-// process and will not be displayed if it is empty.
-var GitTreeState string
+// // GitTreeState indicates if the git tree had uncommited changes when the binary was build. It should be set by the build
+// // process and will not be displayed if it is empty.
+// var GitTreeState string
 
-type BuildInfo struct {
-	Version      string `json:"Version,omitempty"`
-	GitRev       string `json:"GitRev,omitempty"`
-	BuildTime    string `json:"BuildTime,omitempty"`
-	GitTreeState string `json:"GitTreeState,omitempty"`
-}
+// type BuildInfo struct {
+// 	Version      string `json:"Version,omitempty"`
+// 	GitRev       string `json:"GitRev,omitempty"`
+// 	BuildTime    string `json:"BuildTime,omitempty"`
+// 	GitTreeState string `json:"GitTreeState,omitempty"`
+// }
 
+// func newVersionCmd() *cobra.Command {
+// 	cmd := &cobra.Command{
+// 		Use:   "version",
+// 		Short: fmt.Sprint("Print the version number of ", appName),
+// 		Run: func(cmd *cobra.Command, args []string) {
+// 			bi := BuildInfo{
+// 				Version:      Version,
+// 				GitRev:       GitRev,
+// 				BuildTime:    BuildTime,
+// 				GitTreeState: GitTreeState,
+// 			}
+
+// 			version, _ := json.MarshalIndent(bi, "", "  ")
+// 			fmt.Println(string(version))
+// 		},
+// 	}
+// 	return cmd
+// }
+
+
+var (
+	shortened  = false
+	version    = "dev"
+	commit     = "none"
+	date       = "unknown"
+)
 func newVersionCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: fmt.Sprint("Print the version number of ", appName),
-		Run: func(cmd *cobra.Command, args []string) {
-			bi := BuildInfo{
-				Version:      Version,
-				GitRev:       GitRev,
-				BuildTime:    BuildTime,
-				GitTreeState: GitTreeState,
-			}
+		Short: "Version will output the current build information",
+		Long:  ``,
+		Run: func(_ *cobra.Command, _ []string) {
+			var response string
+			versionOutput := goVersion.New(version, commit, date)
 
-			version, _ := json.MarshalIndent(bi, "", "  ")
-			fmt.Println(string(version))
+			if shortened {
+				response = versionOutput.ToShortened()
+			} else {
+				response = versionOutput.ToJSON()
+			}
+			fmt.Printf("%+v", response)
+			return
 		},
 	}
 	return cmd
