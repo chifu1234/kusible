@@ -74,6 +74,7 @@ var (
 	version    = "dev"
 	commit     = "none"
 	date       = "unknown"
+	output     = "json"
 )
 func newVersionCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -81,15 +82,8 @@ func newVersionCmd() *cobra.Command {
 		Short: "Version will output the current build information",
 		Long:  ``,
 		Run: func(_ *cobra.Command, _ []string) {
-			var response string
-			versionOutput := goVersion.New(version, commit, date)
-
-			if shortened {
-				response = versionOutput.ToShortened()
-			} else {
-				response = versionOutput.ToJSON()
-			}
-			fmt.Printf("%+v", response)
+			resp := goVersion.FuncWithOutput(shortened, version, commit, date, output)
+			fmt.Print(resp)
 			return
 		},
 	}
